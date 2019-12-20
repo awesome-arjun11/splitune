@@ -4710,7 +4710,7 @@ a.close.disabled {
 
 .modal {
   position: fixed;
-  top: 0;
+  top: 28px;
   left: 0;
   z-index: 1050;
   display: none;
@@ -4795,7 +4795,7 @@ a.close.disabled {
   flex-direction: column;
   width: 100%;
   pointer-events: auto;
-  background-color: #fff;
+  background-color: #000;
   background-clip: padding-box;
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 0.3rem;
@@ -4803,7 +4803,7 @@ a.close.disabled {
 
 .modal-backdrop {
   position: fixed;
-  top: 0;
+  top: 28px;
   left: 0;
   z-index: 1040;
   width: 100vw;
@@ -9777,28 +9777,10 @@ h1, h2, h3, h4, h5,
   font-size: 22px; }
 
 
-  .hide{
-    display: none !important;
-  }
+.hide{
+  display: none !important;
+}
 
-  .smokescreen{
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    content: '';
-    opacity: 1;
-    z-index: 2;
-  
-	  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, #000 100%);
-}
-.smokescreen > img{
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
-    display: block;
-}
 
 .main-section {
   height: 100%;
@@ -9808,6 +9790,7 @@ h1, h2, h3, h4, h5,
 #titlebar {
   padding: 5px;
   color: #FFF;
+  z-index: 1100;
 }
 
 #titlebar #drag-region {
@@ -9904,4 +9887,158 @@ h1, h2, h3, h4, h5,
 
 .maximized #max-button {
   display: none;
+}
+
+#download2stem:focus, #download4stem:focus, #download5stem:focus{
+    -webkit-box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0);
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0);
+}
+
+#loader-wrapper {
+  position: fixed;
+  top: 28px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  overflow: hidden;
+}
+.no-js #loader-wrapper {
+  display: none;
+}
+
+.loader-logo{
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 7;
+ -webkit-animation: spin-reverse 1.825s linear infinite;
+  animation: spin-reverse 1.825s linear infinite;
+}
+#loader {
+  display: block;
+  position: relative;
+  left: 50%;
+  top: 50%;
+  width: 200px;
+  height: 200px;
+  margin: -75px 0 0 -75px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #16a085;
+  -webkit-animation: spin 1.7s linear infinite;
+  animation: spin 1.7s linear infinite;
+  z-index: 6;
+}
+#loader:before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #e74c3c;
+  -webkit-animation: spin-reverse .6s linear infinite;
+  animation: spin-reverse .6s linear infinite;
+}
+#loader:after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #f9c922;
+  -webkit-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes spin-reverse {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(-360deg);
+  }
+}
+@keyframes spin-reverse {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(-360deg);
+    transform: rotate(-360deg);
+  }
+}
+#loader-wrapper .loader-section {
+  position: fixed;
+  top: 28px;
+  width: 51%;
+  height: 100%;
+  background: rgba(40, 40, 40, 0.8);
+  z-index: 5;
+}
+
+#loader-wrapper .loader-section.section-left {
+  left: -1vw;
+}
+
+#loader-wrapper .loader-section.section-right {
+  right: -1vw;
+}
+
+/* Loaded styles */
+.loaded #loader-wrapper .loader-section.section-left {
+  -webkit-transform: translateX(-100%);
+          transform: translateX(-100%);
+  transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.loaded #loader-wrapper .loader-section.section-right {
+  -webkit-transform: translateX(100%);
+          transform: translateX(100%);
+  transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.loaded #loader {
+  opacity: 0;
+  transition: all 0.3s ease-out;
+}
+
+.loaded #loader-wrapper {
+  visibility: hidden;
+  -webkit-transform: translateY(-100%);
+          transform: translateY(-100%);
+  transition: all 0.3s 1s ease-out;
+}
+
+
+#smokescreenModalCenter{
+  height: 100%;
+  top: 28px;
 }

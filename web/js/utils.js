@@ -1,12 +1,41 @@
 
 
 const {ipcRenderer}=nodeRequire('electron');
+//const perSettings=nodeRequire('electron-settings');
+const perSettings = nodeRequire('electron').remote.require('electron-settings');
 //const remote = noderequire('electron').remote;
 
 // When document has loaded, initialise
 document.onreadystatechange = () => {
-    if (document.readyState == "complete") {
+    if (document.readyState === "complete") {
+        // Windows control (minimize,maximize,close)
         handleWindowControls();
+
+        //Default preferences
+        window.settings = perSettings.get("defaultsettings",{'separator':2,'format':'wav'});
+
+        //preload preferred model
+        eel.model_exists(window.settings.separator)(preloadModel);
+        // stores current useful data for the session
+        window.appdata={};
+
+        //Chosen settings in settings menu
+        discardSettings();
+
+        //on saving settings
+        $('#saveSettings').click(function () {
+            window.settings.separator = $("#defseparator input[type='radio']:checked").val();
+            window.settings.format = $("#defformat input[type='radio']:checked").val();
+            perSettings.set("defaultsettings",window.settings);
+            $('#settingsModalCenter').modal('hide');
+        });
+        //on exporting files
+        $("#exportfiles").click(getExportDirectory);
+
+        // closing settings menu discarding all unsaved changes
+        $('#settingsModalCenter').on('hidden.bs.modal', function () {
+            discardSettings();
+        });
     }
 };
 
@@ -43,21 +72,31 @@ function openfile(){
     ipcRenderer.send('openFile',true)
 }
 
+function getExportDirectory(){
+    ipcRenderer.send('exportDirectory',true)
+}
+
 ipcRenderer.on('filepathname',(event,data)=>{
     //console.log(data);
     var stem = $("#stemcount").attr('data-stem');
-    $(".smokescreen").removeClass('hide');
+    $("#smokescreenModalCenter").modal("show");
     clearAudio();
-    eel.sendfilename(data,stem)(removesmokescreen);
-    
-
+    eel.splitune(data,stem)(onSpleeterRun);
 });
 
-function removesmokescreen(d){
-    console.log(d);
-        
-    $(".smokescreen").addClass('hide');
+ipcRenderer.on('directorypath',(event,data)=>{
+    $("#smokescreenModalCenter").modal("show");
+    eel.export(window.appdata.directory,data,window.settings.format)(removesmokescreen);
+});
+
+function onSpleeterRun(d){
+    window.appdata.directory = d;
+    removesmokescreen();
+    $("#exportfiles").removeClass("hide");
     loadAudio(d);
+}
+function removesmokescreen(){
+    $("#smokescreenModalCenter").modal("hide");
 }
 
 function clearAudio(){
@@ -75,16 +114,13 @@ function clearAudio(){
     setPlayIcon('bass');
     setPlayIcon('piano');
     $('#tunetitle').text("");
-
-    $('.seperated-drums, .seperated-bass, .seperated-piano').addClass('hide');
-
-
+    $('.separated-audio').addClass('hide');
+    $('.separated-drums, .separated-bass, .separated-piano').addClass('hide');
 }
 
 function loadAudio(directory){
-    
     $('#tunetitle').text(directory);
-    $('.sperated-audio').removeClass('hide');
+    $('.separated-audio').removeClass('hide');
     let selectedStem = $("#stemcount").attr('data-stem');
     
     // create vocals and other
@@ -92,94 +128,111 @@ function loadAudio(directory){
     window.waveother = getwavesurfer('#waveform-other');
 
     // Load audio
-    wavevocals.load(`../${directory}/vocals.mp3`);
-    waveother.load(`../${directory}/other.mp3`);
+    wavevocals.load(`../${directory}/vocals.wav`);
+    waveother.load(`../${directory}/other.wav`);
 
     // setup icon change on play/pause events
     wavevocals.on('play', function(){
         setPauseIcon(wavevocals.mediaContainer.id.split("-")[1]);
-    })
+    });
     wavevocals.on('pause', function(){
         setPlayIcon(wavevocals.mediaContainer.id.split("-")[1]);
-    })
+    });
     wavevocals.on('finish', function(){
         setPlayIcon(wavevocals.mediaContainer.id.split("-")[1]);
-    })
-
+    });
     waveother.on('play', function(){
         setPauseIcon(waveother.mediaContainer.id.split("-")[1]);
-    })
+    });
     waveother.on('pause', function(){
         setPlayIcon(waveother.mediaContainer.id.split("-")[1]);
-    })
+    });
     waveother.on('finish', function(){
         setPlayIcon(waveother.mediaContainer.id.split("-")[1]);
-    })
+    });
 
 
     if(selectedStem > 2){
         // Show drums and bass
-        $('.seperated-drums').removeClass('hide');
-        $('.seperated-bass').removeClass('hide');
+        $('.separated-drums').removeClass('hide');
+        $('.separated-bass').removeClass('hide');
 
         // create drums and bass
         window.wavedrums = getwavesurfer('#waveform-drums');
         window.wavebass = getwavesurfer('#waveform-bass');
 
         // Load audio
-        wavebass.load(`../${directory}/bass.mp3`);
-        wavedrums.load(`../${directory}/drums.mp3`);
+        wavebass.load(`../${directory}/bass.wav`);
+        wavedrums.load(`../${directory}/drums.wav`);
 
         //setup icon change
         wavedrums.on('play', function(){
             setPauseIcon(wavedrums.mediaContainer.id.split("-")[1]);
-        })
+        });
         wavedrums.on('finish', function(){
             setPlayIcon(wavedrums.mediaContainer.id.split("-")[1]);
-        })
+        });
         wavedrums.on('pause', function(){
             setPlayIcon(wavedrums.mediaContainer.id.split("-")[1]);
-        })
-
+        });
         wavebass.on('play', function(){
             setPauseIcon(wavebass.mediaContainer.id.split("-")[1]);
-        })
+        });
         wavebass.on('pause', function(){
             setPlayIcon(wavebass.mediaContainer.id.split("-")[1]);
-        })
+        });
         wavebass.on('finish', function(){
             setPlayIcon(wavebass.mediaContainer.id.split("-")[1]);
-        })
+        });
     }
 
     if(selectedStem > 4){
         // Show piano
-        $('.seperated-piano').removeClass('hide');
+        $('.separated-piano').removeClass('hide');
         // create piano
         window.wavepiano= getwavesurfer('#waveform-piano');
         // Load audio
-        wavepiano.load(`../${directory}/piano.mp3`);
+        wavepiano.load(`../${directory}/piano.wav`);
         //setup icon change
         wavepiano.on('play', function(){
             setPauseIcon(wavepiano.mediaContainer.id.split("-")[1]);
-        })
+        });
         wavepiano.on('pause', function(){
             setPlayIcon(wavepiano.mediaContainer.id.split("-")[1]);
-        })
+        });
         wavepiano.on('finish', function(){
             setPlayIcon(wavepiano.mediaContainer.id.split("-")[1]);
-        })
+        });
     }
 }
 
 
 function setPlayIcon(t){
-    $(`#${t} > i:first`).removeClass('ion-ios-pause');
-    $(`#${t} > i:first`).addClass('ion-ios-play');
+    $(`#${t} > i:first`).removeClass('ion-ios-pause').addClass('ion-ios-play');
 }
 
 function setPauseIcon(t){
-    console.log("Inside setPauseIcon: " + t);
-    $(`#${t} > i:first`).removeClass('ion-ios-play');
-    $(`#${t} > i:first`).addClass('ion-ios-pause');
+    $(`#${t} > i:first`).removeClass('ion-ios-play').addClass('ion-ios-pause');
 }
+
+
+function discardSettings(){
+    $('#defformat input:radio[name=defaultformat]').filter(`[value=${window.settings.format}]`).prop('checked', true);
+    $('#defseparator input:radio[name=defaultseparator]').filter(`[value=${window.settings.separator}]`).prop('checked', true);
+}
+
+function preloadModel(check){
+    if(check){
+        eel.preloadmodel(window.settings.separator);
+        //Setting selected model to preferred model
+        selectStem(window.settings.separator);
+    }else{
+        $("settingsModalCenter").modal("show");
+        alert("Default Separator Model Not Found. Download From Preference Menu.");
+    }
+}
+
+
+
+
+
