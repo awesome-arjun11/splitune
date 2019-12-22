@@ -1,2 +1,3 @@
+requests
 Eel==0.11.0
 spleeter==1.4.3

@@ -4,12 +4,17 @@
   "description": "UI for Spleeter",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+	"dist": "electron-builder"
   },
   "author": "Arjun Singh",
   "license": "MIT",
   "dependencies": {
-    "electron": "^7.1.2",
+    "electron-settings": "^3.2.0",
     "wavesurfer.js": "^3.2.0"
+  },
+  "devDependencies" : {
+    "electron": "^7.1.2",
+    "electron-builder": "^21.2.0"
   }
 }

@@ -1,8 +1,3 @@
- /*AOS.init({
- 	duration: 800,
- 	easing: 'slide'
- });
-*/
 (function($) {
 
 	"use strict";
@@ -84,14 +79,14 @@
 
 
 
-/* RELEVENT TO SPLITUNE*/
+/* RELEVANT TO SPLITUNE*/
 $(function() {
 
   $(".progress").each(function() {
 
-    var value = $(this).attr('data-value');
-    var left = $(this).find('.progress-left .progress-bar');
-    var right = $(this).find('.progress-right .progress-bar');
+    let value = $(this).attr('data-value');
+    let left = $(this).find('.progress-left .progress-bar');
+    let right = $(this).find('.progress-right .progress-bar');
 
     if (value > 0) {
       if (value <= 50) {
@@ -146,6 +141,7 @@ function getwavesurfer(elementid){
 		height: 50,
 		partialRender: true,
 		pixelRatio: 1,
+		responsive: true,
 	});
 }
 
@@ -168,7 +164,7 @@ function notifyprogress(name,prog) {
 	if(prog===100){
 		$(`#progress${name} span`).text(`${name} model download complete`);
 		$(`#progress${name}`).addClass('bg-success');
-		--window.activedownloads;
+		window.activedownloads = Math.max(0,window.activedownloads-1);
 		if(window.activedownloads===0){
 			$(`#closesettings`).attr("disabled", false);
 			$(`#discardSettings`).attr("disabled", false);

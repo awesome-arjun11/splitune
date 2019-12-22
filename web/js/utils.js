@@ -8,14 +8,14 @@ const perSettings = nodeRequire('electron').remote.require('electron-settings');
 // When document has loaded, initialise
 document.onreadystatechange = () => {
     if (document.readyState === "complete") {
+
         // Windows control (minimize,maximize,close)
         handleWindowControls();
 
         //Default preferences
         window.settings = perSettings.get("defaultsettings",{'separator':2,'format':'wav'});
 
-        //preload preferred model
-        eel.model_exists(window.settings.separator)(preloadModel);
+        getModelDownloadStatus(preload = true);
         // stores current useful data for the session
         window.appdata={};
 
@@ -33,8 +33,22 @@ document.onreadystatechange = () => {
         $("#exportfiles").click(getExportDirectory);
 
         // closing settings menu discarding all unsaved changes
-        $('#settingsModalCenter').on('hidden.bs.modal', function () {
+        let settingsModal = $('#settingsModalCenter');
+        settingsModal.on('hidden.bs.modal', function () {
             discardSettings();
+        });
+
+        settingsModal.on('shown.bs.modal', function () {
+            getModelDownloadStatus();
+            $.each(window.modelStatus, function (index,val) {
+                if(val){
+                    $(`#download${index}`).attr("disabled", true);
+                    $(`#progress${index}`).css('width',`100%`).addClass('bg-success').children('span').text(`${index} model download complete`);
+                }else{
+                    $(`#download${index}`).attr("disabled", false);
+                    $(`#progress${index}`).css('width',`0%`).removeClass('bg-success').children('span').text(`Download ${index} model`);
+                }
+            })
         });
     }
 };
@@ -128,8 +142,8 @@ function loadAudio(directory){
     window.waveother = getwavesurfer('#waveform-other');
 
     // Load audio
-    wavevocals.load(`../${directory}/vocals.wav`);
-    waveother.load(`../${directory}/other.wav`);
+    wavevocals.load(`../tmpsplit/${directory}/vocals.wav`);
+    waveother.load(`../tmpsplit/${directory}/other.wav`);
 
     // setup icon change on play/pause events
     wavevocals.on('play', function(){
@@ -162,8 +176,8 @@ function loadAudio(directory){
         window.wavebass = getwavesurfer('#waveform-bass');
 
         // Load audio
-        wavebass.load(`../${directory}/bass.wav`);
-        wavedrums.load(`../${directory}/drums.wav`);
+        wavebass.load(`../tmpsplit/${directory}/bass.wav`);
+        wavedrums.load(`../tmpsplit/${directory}/drums.wav`);
 
         //setup icon change
         wavedrums.on('play', function(){
@@ -192,7 +206,7 @@ function loadAudio(directory){
         // create piano
         window.wavepiano= getwavesurfer('#waveform-piano');
         // Load audio
-        wavepiano.load(`../${directory}/piano.wav`);
+        wavepiano.load(`../tmpsplit/${directory}/piano.wav`);
         //setup icon change
         wavepiano.on('play', function(){
             setPauseIcon(wavepiano.mediaContainer.id.split("-")[1]);
@@ -233,6 +247,17 @@ function preloadModel(check){
 }
 
 
+async function getModelDownloadStatus(preload=false){
+
+    if(preload){
+        window.modelStatus = await eel.check_models()();
+        preloadModel(window.modelStatus[`${window.settings.separator}stems`]);
+    }else{
+        eel.check_models()(function (status) {
+            window.modelStatus = status;
+        });
+    }
+}
 
 
 
