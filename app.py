@@ -1,10 +1,6 @@
 __author__ = "Arjun Singh"
 __email__ = "awesome.arjun11@gmail.com"
 
-# pyinstaller:
-import numpy.random.common
-import numpy.random.bounded_integers
-import numpy.random.entropy
 # TODO: Optimise Imports
 import os
 import sys
