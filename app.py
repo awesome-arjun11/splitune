@@ -7,14 +7,14 @@ import sys
 import requests
 import shutil
 import tarfile
-from multiprocessing import Pool
+from gevent.pool import Pool
 from tempfile import TemporaryFile
 import warnings
 
 warnings.filterwarnings('ignore')
 from spleeter.separator import Separator
 from spleeter.model.provider import get_default_model_provider
-from spleeter.utils.audio.adapter import get_default_audio_adapter
+from spleeter.audio.adapter import get_default_audio_adapter
 import eel
 
 
@@ -38,9 +38,9 @@ def splitune(audio_file, stem=2):
     if int(stem) not in (2, 4, 5):
         stem = 2
     empty_directory(directories['tmpsplit'])
-    dirname = "_".join(audio_file.split('\\')[-1].rsplit('.', 1)[0].split(' '))
+    dirname = os.path.splitext(os.path.basename(audio_file))[0]
     fulldirpath = os.path.join(directories['tmpsplit'], dirname)
-    allseperators.get(int(stem), Separator(resource_path('resources', '2stems.json'))).separate_to_file(audio_file, fulldirpath)
+    allseperators.get(int(stem), Separator(resource_path('resources', '2stems.json'))).separate_to_file(audio_file, directories['tmpsplit'])
     if int(stem) == 2:
         os.rename(os.path.join(fulldirpath, f'accompaniment.wav'), os.path.join(fulldirpath, f'other.wav'))
     return dirname
@@ -153,7 +153,7 @@ def export(srcdirname, destination_dir, format='mp3'):
                                   'mp3',
                                   '128k'))
 
-    pool.close()
+    #pool.close()
     pool.join()
 
 
@@ -177,9 +177,6 @@ def resource_path(*args):
 
 
 if __name__ == '__main__':
-    # set path to electron browser. Later to be replaced by electron executable
-    # eel.browsers.set_path('electron', 'path/to/electron-splitune.exe')
-
     eel.browsers.set_path('electron', resource_path('node_modules', 'electron', 'dist', 'electron.exe'))
     eel.init('web')
     directories = {
