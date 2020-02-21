@@ -4,7 +4,6 @@ __email__ = "awesome.arjun11@gmail.com"
 # TODO: Optimise Imports
 import os
 import sys
-import requests
 import shutil
 import tarfile
 from gevent.pool import Pool
@@ -16,6 +15,8 @@ from spleeter.separator import Separator
 from spleeter.model.provider import get_default_model_provider
 from spleeter.audio.adapter import get_default_audio_adapter
 import eel
+
+from downloader import ModelDownloader
 
 
 @eel.expose
@@ -37,7 +38,7 @@ def splitune(audio_file, stem=2):
     """
     if int(stem) not in (2, 4, 5):
         stem = 2
-    empty_directory(directories['tmpsplit'])
+    shutil.rmtree(directories['tmpsplit'])
     dirname = os.path.splitext(os.path.basename(audio_file))[0]
     fulldirpath = os.path.join(directories['tmpsplit'], dirname)
     allseperators.get(int(stem), Separator(resource_path('resources', '2stems.json'))).separate_to_file(audio_file, directories['tmpsplit'])
@@ -55,52 +56,33 @@ def preloadmodel(stem):
     stem : str or int
     """
     global allseperators
-    allseperators[int(stem)]._get_predictor()
+    try:
+        allseperators[int(stem)]._get_predictor()
+    except ValueError as e:
+        shutil.rmtree(f"pretrained_models/{stem}stems", ignore_errors=True)
+
+
 
 
 @eel.expose
 def download_with_progress(name):
-    """Download models with progress
-
-    Parameters
-    ----------
-    name : str
-        Name of the model
-
-    Returns
-    -------
-
-    """
-    modelprovider = get_default_model_provider()
-    url = f'{modelprovider._host}/{modelprovider._repository}/{modelprovider.RELEASE_PATH}/{modelprovider._release}/{name}.tar.gz'
-    model_directory = os.path.join(directories['root'], modelprovider.DEFAULT_MODEL_PATH, name)
+    downloader = ModelDownloader(notifier=eel.notifyprogress)
+    model_directory = os.path.join(directories['root'], downloader.modelprovider.DEFAULT_MODEL_PATH, name)
+    print(model_directory)
     if not os.path.exists(model_directory):
+        os.makedirs(model_directory, exist_ok=True)
         try:
-            os.makedirs(model_directory)
-            response = requests.get(url, stream=True)
-            total_length = int('0' + response.headers.get('content-length'))
-            if response.status_code != 200:
-                raise IOError(f'Resource {url} not found')
-            elif total_length == 0:
-                raise IOError(f'Content length {response.headers.get("content-length")} ({total_length})')
-            with TemporaryFile() as stream:
-                percent = -1
-                while 1:
-                    buff = response.raw.read(total_length // 100)
-                    if not buff:
-                        break
-                    stream.write(buff)
-                    percent += 1
-                    eel.notifyprogress(name, percent)
-                stream.seek(0)
-                tar = tarfile.open(fileobj=stream)
+            with TemporaryFile() as dest:
+                downloader.downloadin(name, dest)
+                dest.seek(0)
+                tar = tarfile.open(fileobj=dest)
                 tar.extractall(path=model_directory)
                 tar.close()
-        except Exception as e:  # TODO: optimise exeption handling
-            import shutil
-            shutil.rmtree(model_directory)
+        except Exception as e:
+            shutil.rmtree(model_directory, ignore_errors=True)
             eel.errorOnDownload(name, e)
             return
+
     eel.notifyprogress(name, 100)
 
 
@@ -153,17 +135,7 @@ def export(srcdirname, destination_dir, format='mp3'):
                                   'mp3',
                                   '128k'))
 
-    #pool.close()
     pool.join()
-
-
-def empty_directory(dir_name):
-    with os.scandir(dir_name) as entries:
-        for entry in entries:
-            if entry.is_file() or entry.is_symlink():
-                os.remove(entry.path)
-            elif entry.is_dir():
-                shutil.rmtree(entry.path)
 
 
 def resource_path(*args):

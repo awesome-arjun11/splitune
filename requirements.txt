@@ -1,4 +1,4 @@
 gevent
 requests
-Eel==0.12.0
-spleeter==1.4.8
+Eel==0.12.2
+spleeter==1.4.9
