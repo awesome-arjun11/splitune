@@ -37,9 +37,9 @@
       ```
               
 ## [Releases](https://github.com/awesome-arjun11/splitune/releases/)
-  1. [Alpha - Portable - v0.1](https://github.com/awesome-arjun11/splitune/releases/tag/v0.1-alpha)
+### Latest
+  1. [Alpha - Portable - v0.2](https://github.com/awesome-arjun11/splitune/releases/tag/v0.2-alpha)
 
 ## To Do List
- 1. Increase download speed.
- 2. MonkeyPatch dependencies for PyInstaller issues.
- 3. Jinja Templates instead of current Hardcoded HTML.
+ 1. MonkeyPatch dependencies for pyinstaller build. 
+
