@@ -41,5 +41,17 @@
   1. [Alpha - Portable - v0.2](https://github.com/awesome-arjun11/splitune/releases/tag/v0.2-alpha)
 
 ## To Do List
- 1. MonkeyPatch dependencies for pyinstaller build. 
-
+ 1. MonkeyPatch dependencies for pyinstaller build.
+ 
+## References
+  #### 1. [Spleeter](https://github.com/deezer/spleeter)
+    ```
+    @misc{spleeter2019,
+    title={Spleeter: A Fast And State-of-the Art Music Source Separation Tool With Pre-trained Models},
+    author={Romain Hennequin and Anis Khlif and Felix Voituret and Manuel Moussallam},
+    howpublished={Late-Breaking/Demo ISMIR 2019},
+    month={November},
+    note={Deezer Research},
+    year={2019}
+    }
+    ```
