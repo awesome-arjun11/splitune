@@ -9,6 +9,7 @@ import tarfile
 from gevent.pool import Pool
 from tempfile import TemporaryFile
 import warnings
+import traceback
 
 warnings.filterwarnings('ignore')
 from spleeter.separator import Separator
@@ -40,11 +41,17 @@ def splitune(audio_file, stem=2):
         stem = 2
     shutil.rmtree(directories['tmpsplit'])
     dirname = os.path.splitext(os.path.basename(audio_file))[0]
+    print(f"file: {audio_file}\nname: {dirname}")
     fulldirpath = os.path.join(directories['tmpsplit'], dirname)
-    allseperators.get(int(stem), Separator(resource_path('resources', '2stems.json'))).separate_to_file(audio_file, directories['tmpsplit'])
-    if int(stem) == 2:
-        os.rename(os.path.join(fulldirpath, f'accompaniment.wav'), os.path.join(fulldirpath, f'other.wav'))
-    return dirname
+    try:
+        allseperators.get(int(stem), Separator(resource_path('resources', '2stems.json'))).separate_to_file(audio_file, directories['tmpsplit'])
+        if int(stem) == 2:
+            os.rename(os.path.join(fulldirpath, f'accompaniment.wav'), os.path.join(fulldirpath, f'other.wav'))
+            eel.addNotification(f"Tune Separated Successfully ({stem}stems model)", "success")
+        return dirname
+    except Exception as e:
+        eel.addNotification(str(e), "danger")
+        eel.alphaDebug(traceback.format_exc())
 
 
 @eel.expose
@@ -59,9 +66,8 @@ def preloadmodel(stem):
     try:
         allseperators[int(stem)]._get_predictor()
     except ValueError as e:
+        # when directory exists but model is corrupted or non existent
         shutil.rmtree(f"pretrained_models/{stem}stems", ignore_errors=True)
-
-
 
 
 @eel.expose
@@ -81,8 +87,9 @@ def download_with_progress(name):
         except Exception as e:
             shutil.rmtree(model_directory, ignore_errors=True)
             eel.errorOnDownload(name, e)
+            eel.alphaDebug(traceback.format_exc())
             return
-
+    eel.addNotification(f"{name} model downloaded", "success")
     eel.notifyprogress(name, 100)
 
 
@@ -136,6 +143,7 @@ def export(srcdirname, destination_dir, format='mp3'):
                                   '128k'))
 
     pool.join()
+    eel.addNotification(f"Exported {format} files to {destination_dir}", "success")
 
 
 def resource_path(*args):
@@ -156,11 +164,14 @@ if __name__ == '__main__':
         'web': resource_path("web"),
         'tmpsplit': resource_path("web", "tmpsplit"),
     }
+    os.makedirs(directories['tmpsplit'], exist_ok=True)
+    os.environ['MODEL_PATH'] = os.path.join(directories['root'], 'pretrained_models')
     allseperators = {
         # using explicit stem.json instead of spleeter:stem to avoid problems with pyinstaller later
         2: Separator(resource_path('resources', '2stems.json')),
         4: Separator(resource_path('resources', '4stems.json')),
         5: Separator(resource_path('resources', '5stems.json'))
     }
-
     eel.start('index.html', mode='electron')
+
+

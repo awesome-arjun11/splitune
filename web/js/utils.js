@@ -38,8 +38,10 @@ document.onreadystatechange = () => {
             discardSettings();
         });
 
+        $("#opensettings").click(getModelDownloadStatus);
+
         settingsModal.on('shown.bs.modal', function () {
-            getModelDownloadStatus();
+            // getModelDownloadStatus();
             $.each(window.modelStatus, function (index,val) {
                 if(val){
                     $(`#download${index}`).attr("disabled", true);
@@ -104,10 +106,12 @@ ipcRenderer.on('directorypath',(event,data)=>{
 });
 
 function onSpleeterRun(d){
-    window.appdata.directory = d;
     removesmokescreen();
-    $("#exportfiles").removeClass("hide");
-    loadAudio(d);
+    if(d) {
+        window.appdata.directory = d;
+        $("#exportfiles").removeClass("hide");
+        loadAudio(d);
+    }
 }
 function removesmokescreen(){
     $("#smokescreenModalCenter").modal("hide");
@@ -242,7 +246,7 @@ function preloadModel(check){
         selectStem(window.settings.separator);
     }else{
         $("settingsModalCenter").modal("show");
-        alert("Default Separator Model Not Found. Download From Preference Menu.");
+        addNotification("Default Separator Model Not Found. Download From Preference Menu.");
     }
 }
 

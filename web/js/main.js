@@ -2,10 +2,10 @@
 
 	"use strict";
 
-	var fullHeight = function() {
+	const fullHeight = function () {
 
 		$('.js-fullheight').css('height', $(window).height());
-		$(window).resize(function(){
+		$(window).resize(function () {
 			$('.js-fullheight').css('height', $(window).height());
 		});
 
@@ -13,38 +13,38 @@
 	fullHeight();
 
 	// scroll
-	var scrollWindow = function() {
-		$(window).scroll(function(){
+	const scrollWindow = function () {
+		$(window).scroll(function () {
 			var $w = $(this),
-					st = $w.scrollTop(),
-					navbar = $('.ftco_navbar'),
-					sd = $('.js-scroll-wrap');
+				st = $w.scrollTop(),
+				navbar = $('.ftco_navbar'),
+				sd = $('.js-scroll-wrap');
 
 			if (st > 150) {
-				if ( !navbar.hasClass('scrolled') ) {
-					navbar.addClass('scrolled');	
+				if (!navbar.hasClass('scrolled')) {
+					navbar.addClass('scrolled');
 				}
-			} 
+			}
 			if (st < 150) {
-				if ( navbar.hasClass('scrolled') ) {
+				if (navbar.hasClass('scrolled')) {
 					navbar.removeClass('scrolled sleep');
 				}
-			} 
-			if ( st > 350 ) {
-				if ( !navbar.hasClass('awake') ) {
-					navbar.addClass('awake');	
+			}
+			if (st > 350) {
+				if (!navbar.hasClass('awake')) {
+					navbar.addClass('awake');
 				}
-				
-				if(sd.length > 0) {
+
+				if (sd.length > 0) {
 					sd.addClass('sleep');
 				}
 			}
-			if ( st < 350 ) {
-				if ( navbar.hasClass('awake') ) {
+			if (st < 350) {
+				if (navbar.hasClass('awake')) {
 					navbar.removeClass('awake');
 					navbar.addClass('sleep');
 				}
-				if(sd.length > 0) {
+				if (sd.length > 0) {
 					sd.removeClass('sleep');
 				}
 			}
@@ -52,16 +52,16 @@
 	};
 	scrollWindow();
 
-	var goHere = function() {
+	const goHere = function () {
 
-		$('.mouse-icon').on('click', function(event){
-			
+		$('.mouse-icon').on('click', function (event) {
+
 			event.preventDefault();
 
 			$('html,body').animate({
 				scrollTop: $('.goto-here').offset().top
 			}, 500, 'easeInOutExpo');
-			
+
 			return false;
 		});
 	};
@@ -76,10 +76,8 @@
 })(jQuery);
 
 
-
-
-
 /* RELEVANT TO SPLITUNE*/
+
 $(function() {
 
   $(".progress").each(function() {
@@ -193,11 +191,17 @@ function addNotification(msg, ntype='info'){
 	if (!(ntype==='info' || ntype==='success' || ntype==='danger' || ntype==='warning')){
 		ntype='info';
 	}
-	let notifyhtml = `<div class="alert alert-${ntype}"><div class="container"><div class="d-flex"><div class="alert-icon"><i class="ion-ios-information-circle-outline"></i></div>p class="mb-0 ml-2"><b>Success Alert:</b>${msg}</p></div><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true"><i class="ion-ios-close"></i></span></button></div></div>`;
+	let notifyhtml = `<div class="alert alert-${ntype}"><div class="container"><div class="d-flex"><div class="alert-icon"><i class="ion-ios-information-circle-outline"></i></div><p class="mb-0 ml-2"><b>Alert: </b><span style="color: #000000">${msg}</span></p></div><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true"><i class="ion-ios-close"></i></span></button></div></div>`;
 	$("#notification_area").append(notifyhtml);
+}
+
+function alphaDebug(debugMsg){
+	console.log(debugMsg);
 }
 
 
 
 eel.expose(notifyprogress);
 eel.expose(errorOnDownload);
+eel.expose(addNotification);
+eel.expose(alphaDebug);
