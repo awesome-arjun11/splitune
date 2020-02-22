@@ -45,7 +45,7 @@
  
 ## References
   #### 1. [Spleeter](https://github.com/deezer/spleeter)
-    ```
+    
     @misc{spleeter2019,
     title={Spleeter: A Fast And State-of-the Art Music Source Separation Tool With Pre-trained Models},
     author={Romain Hennequin and Anis Khlif and Felix Voituret and Manuel Moussallam},
@@ -54,4 +54,4 @@
     note={Deezer Research},
     year={2019}
     }
-    ```
+    
